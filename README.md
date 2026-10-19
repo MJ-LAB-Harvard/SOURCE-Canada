@@ -13,7 +13,7 @@ The original U.S. SOURCE model and its associated materials are available here:
 
 ## Repository Contents
 
-This repository is intended to contain the **model files, replication materials, and analysis code** used in the study. It enables researchers to:
+This repository is intended to contain the **model files, result files, and analysis code** used in the study. It enables researchers to:
 
 - Reproduce the model projections and strategy analyses presented in the manuscript and its supplementary materials.
 - Explore alternative assumptions about the future, such as prescribing practices, treatment capacity, and overdose risk.
