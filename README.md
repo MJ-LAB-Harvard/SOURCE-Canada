@@ -2,9 +2,9 @@
 
 **SOURCE-Canada (Simulation of Opioid Use, Response, Consequences, and Effects – Canada)** is a system dynamics simulation model designed to examine the evolution of the opioid crisis in Canada and evaluate the potential impacts of public health interventions.
 
-Adapted from the U.S. SOURCE model, SOURCE-Canada incorporates Canadian-specific data, model structures, and parameters to simulate people who use opioids, opioid use disorder (OUD), treatment and recovery, and opioid-related overdose deaths. The model accounts for dynamic feedback mechanisms, including social influence and risk perception, and distinguishes between prescription opioids and heroin/illegal synthetic opioids.
+Adapted from the U.S. SOURCE model, SOURCE-Canada incorporates Canadian-specific data, model structures, and parameters to simulate the number of people who use illegal opioids and/or prescription opioids not as prescribed (PWUIO-RxNP), opioid use disorder (OUD), treatment and recovery, and opioid-related overdose deaths. The model accounts for dynamic feedback mechanisms, including social influence and risk perception, and distinguishes between prescription opioids and heroin/illegal synthetic opioids.
 
-The Canadian adaptation retains the core system dynamics framework while incorporating structural modifications, Canadian-specific data, and recalibrated parameters to reflect differences in opioid use patterns, treatment systems, and overdose trends.
+The Canadian adaptation retains the core system dynamics framework while incorporating structural modifications, Canadian-specific data, and recalibrated parameters.
 
 The original U.S. SOURCE model and its associated materials are available here:
 
@@ -16,10 +16,8 @@ The original U.S. SOURCE model and its associated materials are available here:
 This repository is intended to contain the **model files, replication materials, and analysis code** used in the study. It enables researchers to:
 
 - Reproduce the model projections and strategy analyses presented in the manuscript and its supplementary materials.
-- Explore alternative assumptions about future opioid use, prescribing practices, treatment capacity, and overdose risk.
-- Evaluate individual and combined strategies targeting opioid use, OUD, and overdose deaths.
+- Explore alternative assumptions about the future, such as prescribing practices, treatment capacity, and overdose risk.
 - Extend the modeling framework to investigate additional public health strategies and opioid-related outcomes.
-
 
 ---
 
@@ -29,17 +27,9 @@ This repository is intended to contain the **model files, replication materials,
 
 Hasgul, Z., Mahmoudi, H., Plouffe, R., Sadeghieh, T., Johnson, K., Graham, E., & Jalali, M. S.
 
-*Manuscript in preparation / under review. Publication link to be added when available.*
+*Manuscript is under review. Publication link to be added when available.*
 
-The study uses SOURCE-Canada to project opioid-related outcomes through 2036 and assess twelve intervention strategies spanning prevention, treatment, harm reduction, and recovery support.
-
----
-
-## Model Overview and Scenarios
-
-SOURCE-Canada simulates the dynamics of opioid use and OUD, incorporating transitions between opioid use, use disorder, treatment, and remission, as well as feedback mechanisms that influence these transitions over time.
-
-Using historical Canadian data from **2009 to 2024**, the model generates projections through **2036** under three scenarios:
+The study uses SOURCE-Canada to project opioid-related outcomes through 2036 using historical Canadian data from **2009 to 2024**, the model generates projections through **2036** under three scenarios:
 
 - **Base:** Continuation of historical trends and modeled conditions.
 - **Optimistic:** More favorable future conditions related to prescribing, treatment capacity, and overdose risk.
@@ -65,7 +55,7 @@ The SOURCE-Canada model draws on Canadian national surveys, administrative data,
 
 Key data sources include:
 
-- **Opioid use and OUD prevalence:** Canadian Community Health Survey (CCHS), Canadian Alcohol and Drug Survey (CADS), and Canadian Substance Use Survey (CSUS).
+- **PWUIO-RxNP and OUD prevalence:** Canadian Community Health Survey (CCHS), Canadian Alcohol and Drug Survey (CADS), and Canadian Substance Use Survey (CSUS).
 - **Overdose mortality:** Canadian Vital Statistics Death Database and Public Health Agency of Canada opioid and stimulant surveillance data.
 - **Drug supply and fentanyl-related indicators:** Health Canada's Drug Analysis Service.
 - **Prescribing and treatment-related inputs:** IQVIA and information from provincial and territorial sources.
