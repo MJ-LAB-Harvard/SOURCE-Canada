@@ -29,7 +29,7 @@ Hasgul, Z., Mahmoudi, H., Plouffe, R., Sadeghieh, T., Johnson, K., Graham, E., &
 
 *Manuscript is under review. Publication link to be added when available.*
 
-The study uses SOURCE-Canada to project opioid-related outcomes through 2036 using historical Canadian data from **2009 to 2024**, the model generates projections through **2036** under three scenarios:
+The study uses SOURCE-Canada to project opioid-related outcomes through 2036 using historical Canadian data from **2009 to 2025**, the model generates projections through **2036** under three scenarios:
 
 - **Base:** Continuation of historical trends and modeled conditions.
 - **Optimistic:** More favorable future conditions related to prescribing, treatment capacity, and overdose risk.
@@ -60,7 +60,7 @@ Key data sources include:
 - **Drug supply and fentanyl-related indicators:** Health Canada's Drug Analysis Service.
 - **Prescribing and treatment-related inputs:** IQVIA and information from provincial and territorial sources.
 
-The model uses historical data from **2009 to 2024** for calibration and input time series.
+The model uses historical data from **2009 to 2025** for calibration and input time series.
 
 The availability of model input datasets, processed data, and replication files within this repository will be documented alongside their respective sources and any applicable data-sharing restrictions.
 
