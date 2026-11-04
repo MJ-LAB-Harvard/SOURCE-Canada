@@ -1,0 +1,12 @@
+NoiseStartTime = 2024
+Noise SD[RMis] = 0.04
+Noise SD[ROUD] = 0.085
+Noise SD[ROUH] = 0.175
+Noise SD[NDHU] = 0.25
+Noise SD[HUD] = 0.25
+Noise SD[TxBp] = 0.11
+Noise SD[TxMt] = 0.015
+Noise SD[ODRB] = 0.02
+Noise SD[ODHC] = 0.13
+Noise SD[ODSB] = 0.13
+Noise SD[ODTo] = 0.09

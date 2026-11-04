@@ -1,0 +1,43 @@
+
+SPECIAL>NOINTERACTION
+
+
+SPECIAL>LOADMODEL|SOURCE_CA.mdl
+SIMULATE>DATA|"inputtimeseries.vdfx,validationtimeseries.vdfx,monthlytimeseries.vdfx,YearSubs.vdfx"
+SIMULATE>READCIN|Data2024_noise.cin
+
+
+SIMULATE>RUNNAME|baserun
+SIMULATE>ADDCIN|ProjEndValsCA_base.cin
+SIMULATE>ADDCIN|Canada_main_MC.out
+SIMULATE>ADDCIN|Noise2024.cin
+SIMULATE>SETVAL|FINAL TIME=2036
+SIMULATE>SETVAL|MaxDataTime=2024
+SIMULATE>SENSITIVITY|sensitivity_SOURCE_CA.vsc
+SIMULATE>SENSSAVELIST|savelist_projection_SOURCE_CA.lst
+MENU>RUN_SENSITIVITY
+MENU>SENS2FILE|baserun.vdfx|baserun.csv|,*
+
+
+SIMULATE>RUNNAME|pessimisticrun
+SIMULATE>ADDCIN|ProjEndValsCA_pessimistic.cin
+SIMULATE>ADDCIN|Canada_main_MC.out
+SIMULATE>ADDCIN|Noise2024.cin
+SIMULATE>SETVAL|FINAL TIME=2036
+SIMULATE>SETVAL|MaxDataTime=2024
+SIMULATE>SENSITIVITY|sensitivity_SOURCE_CA.vsc
+SIMULATE>SENSSAVELIST|savelist_projection_SOURCE_CA.lst
+MENU>RUN_SENSITIVITY
+MENU>SENS2FILE|pessimisticrun.vdfx|pessimisticrun.csv|,*
+
+SIMULATE>RUNNAME|optimisticrun
+SIMULATE>ADDCIN|ProjEndValsCA_optimistic.cin
+SIMULATE>ADDCIN|Canada_main_MC.out
+SIMULATE>ADDCIN|Noise2024.cin
+SIMULATE>SETVAL|FINAL TIME=2036
+SIMULATE>SETVAL|MaxDataTime=2024
+SIMULATE>SENSITIVITY|sensitivity_SOURCE_CA.vsc
+SIMULATE>SENSSAVELIST|savelist_projection_SOURCE_CA.lst
+MENU>RUN_SENSITIVITY
+MENU>SENS2FILE|optimisticrun.vdfx|optimisticrun.csv|,*
+

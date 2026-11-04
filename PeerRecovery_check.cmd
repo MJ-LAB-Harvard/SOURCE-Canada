@@ -1,0 +1,211 @@
+SPECIAL>NOINTERACTION
+SPECIAL>LOADMODEL|SOURCE_CA.mdl
+SIMULATE>DATA|"inputtimeseries.vdfx,validationtimeseries.vdfx,monthlytimeseries.vdfx,YearSubs.vdfx"
+
+SIMULATE>READCIN|Canada_main_MC.out
+SIMULATE>ADDCIN|ProjEndValsCA_base.cin
+SIMULATE>ADDCIN|Reset.cin
+SIMULATE>SETVAL|SAVEPER=1
+SIMULATE>SETVAL|FINAL TIME=2036
+SIMULATE>SETVAL|Policy activation time=2026
+SIMULATE>SETVAL|Policy rampup duration=3
+SIMULATE>SETVAL|MaxDataTime=2024
+SIMULATE>SETVAL|NoiseStartTime=2037
+SIMULATE>SETVAL|Switch for constant projections[Proj]=0
+SIMULATE>RUNNAME|PeerSIcheck
+SIMULATE>SAVELIST|savelist_peer_SOURCE_CA.lst
+MENU>RUN|o
+MENU>VDF2CSV|PeerSIcheck.vdfx|PeerSIcheck.csv|savelist_peer_SOURCE_CA.lst
+
+SIMULATE>READCIN|Canada_main_MC.out
+SIMULATE>ADDCIN|ProjEndValsCA_base.cin
+SIMULATE>ADDCIN|Reset.cin
+SIMULATE>ADDCIN|DivRxInit20.cin
+SIMULATE>SETVAL|SAVEPER=1
+SIMULATE>SETVAL|FINAL TIME=2036
+SIMULATE>SETVAL|Policy activation time=2026
+SIMULATE>SETVAL|Policy rampup duration=3
+SIMULATE>SETVAL|MaxDataTime=2024
+SIMULATE>SETVAL|NoiseStartTime=2037
+SIMULATE>SETVAL|Switch for constant projections[Proj]=0
+SIMULATE>RUNNAME|BestFit_DivRxInit20
+SIMULATE>SAVELIST|savelist_peer_SOURCE_CA.lst
+MENU>RUN|o
+MENU>VDF2CSV|BestFit_DivRxInit20.vdfx|BestFit_DivRxInit20.csv|savelist_peer_SOURCE_CA.lst
+
+SIMULATE>READCIN|Canada_main_MC.out
+SIMULATE>ADDCIN|ProjEndValsCA_base.cin
+SIMULATE>ADDCIN|Reset.cin
+SIMULATE>ADDCIN|HInit20.cin
+SIMULATE>SETVAL|SAVEPER=1
+SIMULATE>SETVAL|FINAL TIME=2036
+SIMULATE>SETVAL|Policy activation time=2026
+SIMULATE>SETVAL|Policy rampup duration=3
+SIMULATE>SETVAL|MaxDataTime=2024
+SIMULATE>SETVAL|NoiseStartTime=2037
+SIMULATE>SETVAL|Switch for constant projections[Proj]=0
+SIMULATE>RUNNAME|BestFit_HInit20
+SIMULATE>SAVELIST|savelist_peer_SOURCE_CA.lst
+MENU>RUN|o
+MENU>VDF2CSV|BestFit_HInit20.vdfx|BestFit_HInit20.csv|savelist_peer_SOURCE_CA.lst
+
+SIMULATE>READCIN|Canada_main_MC.out
+SIMULATE>ADDCIN|ProjEndValsCA_base.cin
+SIMULATE>ADDCIN|Reset.cin
+SIMULATE>ADDCIN|OwnRxInit20.cin
+SIMULATE>SETVAL|SAVEPER=1
+SIMULATE>SETVAL|FINAL TIME=2036
+SIMULATE>SETVAL|Policy activation time=2026
+SIMULATE>SETVAL|Policy rampup duration=3
+SIMULATE>SETVAL|MaxDataTime=2024
+SIMULATE>SETVAL|NoiseStartTime=2037
+SIMULATE>SETVAL|Switch for constant projections[Proj]=0
+SIMULATE>RUNNAME|BestFit_OwnRxInit20
+SIMULATE>SAVELIST|savelist_peer_SOURCE_CA.lst
+MENU>RUN|o
+MENU>VDF2CSV|BestFit_OwnRxInit20.vdfx|BestFit_OwnRxInit20.csv|savelist_peer_SOURCE_CA.lst
+
+SIMULATE>READCIN|Canada_main_MC.out
+SIMULATE>ADDCIN|ProjEndValsCA_base.cin
+SIMULATE>ADDCIN|Reset.cin
+SIMULATE>ADDCIN|RxRate20.cin
+SIMULATE>SETVAL|SAVEPER=1
+SIMULATE>SETVAL|FINAL TIME=2036
+SIMULATE>SETVAL|Policy activation time=2026
+SIMULATE>SETVAL|Policy rampup duration=3
+SIMULATE>SETVAL|MaxDataTime=2024
+SIMULATE>SETVAL|NoiseStartTime=2037
+SIMULATE>SETVAL|Switch for constant projections[Proj]=0
+SIMULATE>RUNNAME|BestFit_RxRate20
+SIMULATE>SAVELIST|savelist_peer_SOURCE_CA.lst
+MENU>RUN|o
+MENU>VDF2CSV|BestFit_RxRate20.vdfx|BestFit_RxRate20.csv|savelist_peer_SOURCE_CA.lst
+
+SIMULATE>READCIN|Canada_main_MC.out
+SIMULATE>ADDCIN|ProjEndValsCA_base.cin
+SIMULATE>ADDCIN|Reset.cin
+SIMULATE>ADDCIN|DevOUD20.cin
+SIMULATE>SETVAL|SAVEPER=1
+SIMULATE>SETVAL|FINAL TIME=2036
+SIMULATE>SETVAL|Policy activation time=2026
+SIMULATE>SETVAL|Policy rampup duration=3
+SIMULATE>SETVAL|MaxDataTime=2024
+SIMULATE>SETVAL|NoiseStartTime=2037
+SIMULATE>SETVAL|Switch for constant projections[Proj]=0
+SIMULATE>RUNNAME|BestFit_DevOUD20
+SIMULATE>SAVELIST|savelist_peer_SOURCE_CA.lst
+MENU>RUN|o
+MENU>VDF2CSV|BestFit_DevOUD20.vdfx|BestFit_DevOUD20.csv|savelist_peer_SOURCE_CA.lst
+
+SIMULATE>READCIN|Canada_main_MC.out
+SIMULATE>ADDCIN|ProjEndValsCA_base.cin
+SIMULATE>ADDCIN|Reset.cin
+SIMULATE>ADDCIN|ReturntoOUD20.cin
+SIMULATE>SETVAL|SAVEPER=1
+SIMULATE>SETVAL|FINAL TIME=2036
+SIMULATE>SETVAL|Policy activation time=2026
+SIMULATE>SETVAL|Policy rampup duration=3
+SIMULATE>SETVAL|MaxDataTime=2024
+SIMULATE>SETVAL|NoiseStartTime=2037
+SIMULATE>SETVAL|Switch for constant projections[Proj]=0
+SIMULATE>RUNNAME|BestFit_ReturntoOUD20
+SIMULATE>SAVELIST|savelist_peer_SOURCE_CA.lst
+MENU>RUN|o
+MENU>VDF2CSV|BestFit_ReturntoOUD20.vdfx|BestFit_ReturntoOUD20.csv|savelist_peer_SOURCE_CA.lst
+
+SIMULATE>READCIN|Canada_main_MC.out
+SIMULATE>ADDCIN|ProjEndValsCA_base.cin
+SIMULATE>ADDCIN|Reset.cin
+SIMULATE>ADDCIN|PeerRecovery20.cin
+SIMULATE>SETVAL|SAVEPER=1
+SIMULATE>SETVAL|FINAL TIME=2036
+SIMULATE>SETVAL|Policy activation time=2026
+SIMULATE>SETVAL|Policy rampup duration=3
+SIMULATE>SETVAL|MaxDataTime=2024
+SIMULATE>SETVAL|NoiseStartTime=2037
+SIMULATE>SETVAL|Switch for constant projections[Proj]=0
+SIMULATE>RUNNAME|BestFit_PeerRec20
+SIMULATE>SAVELIST|savelist_peer_SOURCE_CA.lst
+MENU>RUN|o
+MENU>VDF2CSV|BestFit_PeerRec20.vdfx|BestFit_PeerRec20.csv|savelist_peer_SOURCE_CA.lst
+
+SIMULATE>READCIN|Canada_main_MC.out
+SIMULATE>ADDCIN|ProjEndValsCA_base.cin
+SIMULATE>ADDCIN|Reset.cin
+SIMULATE>ADDCIN|FentODRisk20.cin
+SIMULATE>SETVAL|SAVEPER=1
+SIMULATE>SETVAL|FINAL TIME=2036
+SIMULATE>SETVAL|Policy activation time=2026
+SIMULATE>SETVAL|Policy rampup duration=3
+SIMULATE>SETVAL|MaxDataTime=2024
+SIMULATE>SETVAL|NoiseStartTime=2037
+SIMULATE>SETVAL|Switch for constant projections[Proj]=0
+SIMULATE>RUNNAME|BestFit_FentODRisk20
+SIMULATE>SAVELIST|savelist_peer_SOURCE_CA.lst
+MENU>RUN|o
+MENU>VDF2CSV|BestFit_FentODRisk20.vdfx|BestFit_FentODRisk20.csv|savelist_peer_SOURCE_CA.lst
+
+SIMULATE>READCIN|Canada_main_MC.out
+SIMULATE>ADDCIN|ProjEndValsCA_base.cin
+SIMULATE>ADDCIN|Reset.cin
+SIMULATE>ADDCIN|NxKits20.cin
+SIMULATE>SETVAL|SAVEPER=1
+SIMULATE>SETVAL|FINAL TIME=2036
+SIMULATE>SETVAL|Policy activation time=2026
+SIMULATE>SETVAL|Policy rampup duration=3
+SIMULATE>SETVAL|MaxDataTime=2024
+SIMULATE>SETVAL|NoiseStartTime=2037
+SIMULATE>SETVAL|Switch for constant projections[Proj]=0
+SIMULATE>RUNNAME|BestFit_NxKits20
+SIMULATE>SAVELIST|savelist_peer_SOURCE_CA.lst
+MENU>RUN|o
+MENU>VDF2CSV|BestFit_NxKits20.vdfx|BestFit_NxKits20.csv|savelist_peer_SOURCE_CA.lst
+
+SIMULATE>READCIN|Canada_main_MC.out
+SIMULATE>ADDCIN|ProjEndValsCA_base.cin
+SIMULATE>ADDCIN|Reset.cin
+SIMULATE>ADDCIN|ODwitnessed20.cin
+SIMULATE>SETVAL|SAVEPER=1
+SIMULATE>SETVAL|FINAL TIME=2036
+SIMULATE>SETVAL|Policy activation time=2026
+SIMULATE>SETVAL|Policy rampup duration=3
+SIMULATE>SETVAL|MaxDataTime=2024
+SIMULATE>SETVAL|NoiseStartTime=2037
+SIMULATE>SETVAL|Switch for constant projections[Proj]=0
+SIMULATE>RUNNAME|BestFit_ODwitnessed20
+SIMULATE>SAVELIST|savelist_peer_SOURCE_CA.lst
+MENU>RUN|o
+MENU>VDF2CSV|BestFit_ODwitnessed20.vdfx|BestFit_ODwitnessed20.csv|savelist_peer_SOURCE_CA.lst
+
+SIMULATE>READCIN|Canada_main_MC.out
+SIMULATE>ADDCIN|ProjEndValsCA_base.cin
+SIMULATE>ADDCIN|Reset.cin
+SIMULATE>ADDCIN|TxSeeking20.cin
+SIMULATE>SETVAL|SAVEPER=1
+SIMULATE>SETVAL|FINAL TIME=2036
+SIMULATE>SETVAL|Policy activation time=2026
+SIMULATE>SETVAL|Policy rampup duration=3
+SIMULATE>SETVAL|MaxDataTime=2024
+SIMULATE>SETVAL|NoiseStartTime=2037
+SIMULATE>SETVAL|Switch for constant projections[Proj]=0
+SIMULATE>RUNNAME|BestFit_TxSeeking20
+SIMULATE>SAVELIST|savelist_peer_SOURCE_CA.lst
+MENU>RUN|o
+MENU>VDF2CSV|BestFit_TxSeeking20.vdfx|BestFit_TxSeeking20.csv|savelist_peer_SOURCE_CA.lst
+
+SIMULATE>READCIN|Canada_main_MC.out
+SIMULATE>ADDCIN|ProjEndValsCA_base.cin
+SIMULATE>ADDCIN|Reset.cin
+SIMULATE>ADDCIN|TxDuration20.cin
+SIMULATE>SETVAL|SAVEPER=1
+SIMULATE>SETVAL|FINAL TIME=2036
+SIMULATE>SETVAL|Policy activation time=2026
+SIMULATE>SETVAL|Policy rampup duration=3
+SIMULATE>SETVAL|MaxDataTime=2024
+SIMULATE>SETVAL|NoiseStartTime=2037
+SIMULATE>SETVAL|Switch for constant projections[Proj]=0
+SIMULATE>RUNNAME|BestFit_TxDuration20
+SIMULATE>SAVELIST|savelist_peer_SOURCE_CA.lst
+MENU>RUN|o
+MENU>VDF2CSV|BestFit_TxDuration20.vdfx|BestFit_TxDuration20.csv|savelist_peer_SOURCE_CA.lst
+

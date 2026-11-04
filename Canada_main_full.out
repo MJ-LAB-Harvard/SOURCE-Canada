@@ -1,0 +1,84 @@
+:COMSYS After 515478 simulations
+:COMSYS Best payoff is -22122.2
+:COMSYS User terminated multiple search session
+:OPTIMIZER=Powell
+:SENSITIVITY=Off
+:MULTIPLE_START=RRandom
+:RANDOM_NUMBER=Default
+:SEED=1
+:OUTPUT_LEVEL=On
+:TRACE=Off
+:MAX_ITERATIONS=2000
+:RESTART_MAX=20
+:PASS_LIMIT=2
+:FRACTIONAL_TOLERANCE=1e-06
+:TOLERANCE_MULTIPLIER=21
+:ABSOLUTE_TOLERANCE=1
+:SCALE_ABSOLUTE=1
+:VECTOR_POINTS=25
+:MCINITMETHOD=0
+:MCPAYOFFTYPE=0
+:MCRECORD=0
+:MCSCHEDULE=0
+:MCLIMIT=0
+:MCBURNIN=0
+:MCNCHAINS=2
+:MCOUTLIER=0.05
+:MCGAMMA=1
+:MCEPSILON=0.01
+:MCDELTA=0.0001
+:MCJUMP=0.05
+:MCUPDATEPAIRS=2
+:MCXOVER=0.2
+:MCTEMP=1
+:MCFTEMP=1
+:MCCOOLING=1000
+0.025 <= Developing HUD rate no Rx OUD    = 0.0754807  <= 0.75
+0.025 <= Developing HUD rate with Rx OUD   = 0.0415694  <= 2.25
+0.005 <= Developing Rx OUD rate  = 0.0300269  <= 0.45
+0.25 <= Fraction Nx kits to NDHU Rx OUD with PY heroin and HUD  = 0.99  <= 0.99
+2340 <= Initiating heroin no Rx base  = 21074.1  <= 28080
+105300 <= Initiating Rx NP diverted base  = 275404  <= 421200
+0.002 <= Initiation rate heroin with Rx NP  = 0.00354286  <= 0.045
+1 <= Initiation rate heroin with Rx OUD relative to Rx NP = 1.82293  <= 7.5
+0.005 <= Net quit rate heroin with Rx NP    = 0.005  <= 1
+0.005 <= Net quit rate heroin with Rx OUD     = 0.0705037  <= 0.3
+0.025 <= Net quit rate NDHU   = 0.0250001  <= 0.75
+0.025 <= Net quit rate Rx NP    = 0.235852  <= 0.75
+0.0001 <= Nx kit distribution efficiency = 0.000101971  <= 0.003
+0.025 <= Overdose rate base HUD = 0.033021  <= 0.3
+0.125 <= Overdose rate NDHU relative to HUD = 0.125  <= 1
+0.0005 <= Overdose rate base Rx NP = 0.0005  <= 0.0375
+0.0125 <= Overdose rate base Rx OUD = 0.108538  <= 0.6
+0.0025 <= Overdose rate synth baseline = 0.00301023  <= 0.15
+0.7 <= Base survival probability H OD relative to Rx   = 0.988269  <= 1
+0.85 <= Base survival probability Rx OD    = 0.965775  <= 0.99
+0.1 <= Fentanyl effect on base survival max relative to H   = 0.680778  <= 0.9
+1.5 <= Fentanyl effect on OD rate H max  = 7.49031  <= 10
+0.005 <= Relapse rate HUD = 0.365237  <= 1.5
+0.025 <= Relapse rate Rx OUD relative to HUD = 0.349231  <= 1.5
+1 <= Remission rate Rx OUD relative to HUD = 1.67102  <= 3
+0.05 <= Tx seeking rate Rx OUD no H total = 0.201995  <= 1.5
+0.25 <= Tx seeking fraction Bup Rx OUD = 0.400917  <= 1
+0.25 <= Tx seeking fraction Bup HUD = 0.860503  <= 1
+0.1 <= Tx average duration Bup = 0.421156  <= 1.5
+0.1 <= Tx average duration MMT = 1.01873  <= 1.5
+0.6 <= Initial stock correction[RXM] = 0.957986  <= 1.4
+0.6 <= Initial stock correction[NDH] = 0.6  <= 1.4
+0.6 <= Initial stock correction[OUB] = 0.6  <= 1.4
+0.6 <= Initial stock correction[OUT] = 0.862107  <= 1.4
+0.6 <= Initial stock correction[OUR] = 1.4  <= 1.4
+0.6 <= Initial stock correction[OUS] = 1.19259  <= 1.4
+0.6 <= Initial stock correction[OHB] = 0.6  <= 1.4
+0.6 <= Initial stock correction[OHT] = 1.14862  <= 1.4
+0.6 <= Initial stock correction[OHR] = 1.4  <= 1.4
+0.6 <= Initial stock correction[OHS] = 1.07203  <= 1.4
+0.6 <= Initial stock correction[HUB] = 0.600041  <= 1.4
+0.6 <= Initial stock correction[HUT] = 0.6  <= 1.4
+0.6 <= Initial stock correction[HUR] = 0.6  <= 1.4
+0.6 <= Initial stock correction[HUS] = 1.04106  <= 1.4
+1e-06 <= Perceived risk strength initiating heroin with Rx use   = 0.52333  <= 2
+1e-06 <= Perceived risk strength initiating NDHU no Rx    = 1e-06  <= 2
+1e-06 <= Perceived risk strength initiating Rx NP diverted    = 2  <= 2
+1e-06 <= Perceived risk strength initiating Rx NP own Rx    = 2  <= 2
+1e-06 <= Perceived risk strength net quit Rx NP    = 2  <= 2

@@ -1,0 +1,212 @@
+---
+title: "SOURCE-CA projections (Figure 1, Table S6)"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+<!--
+Figure 1 and Table S6: projections under the base, optimistic and pessimistic scenarios.
+Intervals are 90% (5th-95th percentiles across the 5,000 posterior draws).
+Run from the project folder: reads {baserun,optimisticrun,pessimisticrun}.csv from results/ or the project folder and
+"Plot data with error bars.xlsx" (historical data with error bars); writes to "figures and tables/".
+-->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(readxl)
+library(ggplot2)
+library(scales)
+library(patchwork)
+library(svglite)
+
+results_dir <- "results"
+# The .cmd files write their CSVs to the project folder; use results/ if the file was moved there
+find_result <- function(f) if (file.exists(file.path(results_dir, f))) file.path(results_dir, f) else f
+figures_dir <- "figures and tables"
+dir.create(figures_dir, showWarnings = FALSE)
+```
+
+```{r settings}
+# Uncertainty interval across posterior draws: 90% (5th-95th percentiles)
+ci_level <- 0.90
+
+components <- c("Noise PWURx NP", "Noise Rx OUD", "Noise Rx death",
+                "Noise NDHU", "Noise HUD", "Noise synth death")
+totals     <- c("Noise total PWURx NP and NDHU", "Noise total UD", "Noise total death")
+
+panel_labels <- c(
+  "Noise PWURx NP"             = "People who use prescription\n opioids not as prescribed (people)",
+  "Noise Rx OUD"                = "Prescription opioid use disorder (people)",
+  "Noise Rx death"              = "Prescription opioid overdose\ndeaths (people/year)",
+  "Noise NDHU"                  = "People who use heroin / illegal synthetics\nwithout use disorder (people)",
+  "Noise HUD"                   = "Heroin / illegal synthetics opioid\nuse disorder (people)",
+  "Noise synth death"           = "Heroin / illegal synthetics overdose\ndeaths (people/year)",
+  "Noise total PWURx NP and NDHU" = "Total people who use illegal opioids and/or\nprescription opioids not as prescribed (people)",
+  "Noise total UD"              = "Total people with opioid use disorder (people)",
+  "Noise total death"           = "Total opioid overdose deaths (people/year)"
+)
+
+# y-axis upper limit for each panel (axes start at 0)
+y_max <- c("Noise PWURx NP" = 2000000, "Noise NDHU" = 2000000, "Noise total PWURx NP and NDHU" = 2000000,
+           "Noise Rx OUD" = 800000, "Noise HUD" = 800000, "Noise total UD" = 800000,
+           "Noise Rx death" = 10000, "Noise synth death" = 10000, "Noise total death" = 10000)
+
+scenario_colors <- c(Base = "#1F78B4", Optimistic = "#33A02C", Pessimistic = "#E31A1C")
+```
+
+```{r read-data}
+# Vensim sensitivity output: one row per posterior draw; columns "T<k> <variable>", T0 = 2009
+read_long <- function(file, scenario, outcomes) {
+  dt   <- fread(find_result(file))
+  cols <- grep(paste0("^T\\d+ (", paste(outcomes, collapse = "|"), ")$"), names(dt), value = TRUE)
+  dt   <- dt[, ..cols][, sim_run := .I]
+  long <- melt(dt, id.vars = "sim_run", variable.name = "temp_col", value.name = "value")
+  long[, `:=`(year     = 2009L + as.integer(str_extract(temp_col, "(?<=^T)\\d+")),
+              variable = str_remove(temp_col, "^T\\d+ "),
+              scenario = scenario)]
+  long[, .(sim_run, year, variable, scenario, value)]
+}
+
+outcomes <- c(components, totals)
+df_all_long <- rbindlist(list(
+  read_long("baserun.csv",        "Base",        outcomes),
+  read_long("optimisticrun.csv", "Optimistic",  outcomes),
+  read_long("pessimisticrun.csv", "Pessimistic", outcomes)))
+
+df_summary <- df_all_long[, .(mean_value = mean(value),
+                              lower      = quantile(value, (1 - ci_level) / 2),
+                              upper      = quantile(value, 1 - (1 - ci_level) / 2)),
+                          by = .(year, variable, scenario)]
+
+# Historical data (mean, lower, upper); sheet row "Noise Rx misuse" is the PWURx NP series; total deaths shown in the totals row
+raw_data <- read_excel("Plot data with error bars.xlsx", sheet = "plot data")
+names(raw_data)[1] <- "Variable"
+
+historical <- raw_data %>%
+  mutate(Variable = str_squish(gsub("\u00a0", " ", Variable)),
+         Variable = str_replace(Variable, "^Noise Rx misuse", "Noise PWURx NP")) %>%
+  pivot_longer(-Variable, names_to = "year", values_to = "value") %>%
+  mutate(metric   = str_extract(Variable, "(?i)lower|mean|upper"),
+         variable = str_squish(str_remove(Variable, "\\s+(?i)(lower|mean|upper)$"))) %>%
+  pivot_wider(id_cols = c(year, variable), names_from = metric, values_from = value) %>%
+  transmute(year = as.integer(year), variable, scenario = "Historical",
+            mean_value = mean, lower, upper) %>%
+  filter(variable %in% outcomes, !is.na(mean_value))
+```
+
+```{r table-S6}
+# Table S6: 2024 (base) and 2036 (three scenarios); mean (90% interval), rounded to whole people
+table_S6 <- df_summary %>%
+  filter((year == 2024 & scenario == "Base") | year == 2036) %>%
+  mutate(column = ifelse(year == 2024, "2024", paste("2036", scenario)),
+         across(c(mean_value, lower, upper), round)) %>%
+  select(variable, column, mean_value, lower, upper) %>%
+  arrange(factor(variable, levels = outcomes), column)
+
+knitr::kable(table_S6, format.args = list(big.mark = ","))
+fwrite(table_S6, file.path(figures_dir, "Table S6.csv"))
+```
+
+```{r table-S6-layout}
+# Table S6 in the article layout (rows: opioid type x outcome; cells "mean (lower; upper)"), ready to paste
+s6_rows <- tibble::tribble(
+  ~variable,                        ~Group,     ~Outcome,      ~Unit,
+  "Noise PWURx NP",                 "Rx",       "PWUIO-RxNP",  "people",
+  "Noise Rx OUD",                   "Rx",       "OUD",         "people",
+  "Noise Rx death",                 "Rx",       "Death",       "people/year",
+  "Noise NDHU",                     "IO",       "PWUIO-RxNP",  "people",
+  "Noise HUD",                      "IO",       "OUD",         "people",
+  "Noise synth death",              "IO",       "Death",       "people/year",
+  "Noise total PWURx NP and NDHU",  "Combined", "PWUIO-RxNP",  "people",
+  "Noise total UD",                 "Combined", "OUD",         "people",
+  "Noise total death",              "Combined", "Death",       "people/year")
+cell <- function(m, l, u) sprintf("%s (%s; %s)", comma(m, accuracy = 1), comma(l, accuracy = 1), comma(u, accuracy = 1))
+table_S6_layout <- table_S6 %>%
+  mutate(value = cell(mean_value, lower, upper)) %>%
+  select(variable, column, value) %>%
+  tidyr::pivot_wider(names_from = column, values_from = value) %>%
+  right_join(s6_rows, by = "variable") %>%
+  select(Group, Outcome, Unit, `2024`, `2036 Base`, `2036 Optimistic`, `2036 Pessimistic`) %>%
+  mutate(Group = factor(Group, levels = c("Rx", "IO", "Combined"))) %>% arrange(Group)
+fwrite(table_S6_layout, file.path(figures_dir, "Table S6_article layout.csv"), bom = TRUE)
+```
+
+```{r plot-function}
+# Last year in which all three scenarios still have the same mean (scenarios branch after it)
+branch_start <- as.data.frame(df_summary) %>%
+  select(variable, year, scenario, mean_value) %>%
+  tidyr::pivot_wider(names_from = scenario, values_from = mean_value) %>%
+  group_by(variable) %>%
+  summarize(start = max(year[abs(Optimistic - Base) <= 1e-6 * abs(Base) &
+                             abs(Pessimistic - Base) <= 1e-6 * abs(Base) & year < 2024]), .groups = "drop")
+branch_start <- setNames(branch_start$start, branch_start$variable)
+
+projection_panels <- function(vars, show_historical, nrow) {
+  d    <- as.data.frame(df_summary) %>% filter(variable %in% vars) %>%
+          mutate(variable = factor(variable, levels = vars))
+  hist <- historical %>% filter(variable %in% vars) %>% mutate(variable = factor(variable, levels = vars))
+  lim  <- data.frame(variable = factor(rep(vars, 2), levels = vars),
+                     y = c(rep(0, length(vars)), y_max[vars]))
+
+  p <- ggplot() +
+    geom_blank(data = lim, aes(y = y)) +
+    geom_line(data = d %>% filter(year <= 2024, scenario == "Base"),
+              aes(x = year, y = mean_value), colour = "gray50", linewidth = 1) +
+    geom_ribbon(data = d %>% filter(year <= 2024, scenario == "Base"),
+                aes(x = year, ymin = lower, ymax = upper, fill = scenario), alpha = .2) +
+    # Scenarios can differ before 2024 (some input data end earlier): grey lines join them to the projections
+    geom_line(data = d %>% filter(scenario != "Base", year <= 2024, year >= branch_start[as.character(variable)]),
+              aes(x = year, y = mean_value, group = scenario), colour = "gray50", linewidth = 1) +
+    geom_line(data = d %>% filter(year >= 2024),
+              aes(x = year, y = mean_value, colour = scenario), linewidth = .5) +
+    geom_ribbon(data = d %>% filter(year >= 2024),
+                aes(x = year, ymin = lower, ymax = upper, fill = scenario), alpha = .2) +
+    geom_vline(xintercept = 2024, linetype = "dashed", colour = "black", linewidth = 1) +
+    facet_wrap(~ variable, nrow = nrow, scales = "free_y", labeller = as_labeller(panel_labels)) +
+    scale_color_manual(name = NULL, values = scenario_colors) +
+    scale_fill_manual(name = NULL, values = scenario_colors) +
+    scale_x_continuous(breaks = 2009:2036) +
+    scale_y_continuous(labels = scales::comma, expand = expansion(mult = c(0, 0.02)),
+                       breaks = function(lim) if (lim[2] < 20000) seq(0, lim[2], by = 5000) else scales::extended_breaks()(lim)) +
+    labs(x = NULL, y = NULL) +
+    theme_bw() +
+    theme(panel.grid  = element_blank(),
+          axis.text.x = element_text(angle = 90, vjust = .5, hjust = 1, size = 10),
+          axis.text.y = element_text(size = 10),
+          strip.text  = element_text(face = "bold", size = 12))
+  if (show_historical) {
+    p <- p +
+      geom_errorbar(data = hist, aes(x = year, ymin = lower, ymax = upper), width = .25, colour = "grey70") +
+      geom_point(data = hist, aes(x = year, y = mean_value), colour = "grey50", size = 1.6)
+  }
+  p
+}
+```
+
+```{r figure-1, fig.align="center", echo = FALSE, fig.width = 15, fig.height = 12}
+projection_plot  <- projection_panels(components, show_historical = TRUE,  nrow = 2) +
+  theme(legend.position = "none")
+projection_plot2 <- projection_panels(totals,     show_historical = TRUE,  nrow = 1) +
+  theme(legend.position = "bottom", legend.text = element_text(size = 15))
+
+separator_line <- ggplot() +
+  geom_hline(yintercept = 0, colour = "black", linewidth = 1.5) +
+  scale_x_continuous(expand = c(-1, 0)) +
+  coord_cartesian(clip = "off") +
+  theme_void() +
+  theme(plot.margin = margin(10, 0, 10, 0))
+
+combined_plot <- projection_plot / separator_line / projection_plot2 +
+  plot_layout(heights = c(2, 0.1, 1))
+combined_plot
+```
+
+```{r save}
+ggsave(file.path(figures_dir, "Figure 1.svg"), plot = combined_plot,
+       width = 15, height = 12, units = "in", dpi = 300)
+```

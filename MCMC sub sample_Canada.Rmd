@@ -1,0 +1,75 @@
+---
+title: "SOURCE CA MCMC downsampling"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(readr)
+library(data.table)
+library(dplyr)
+library(tidyverse)
+library(readxl)
+
+
+
+```
+
+
+```{r read-sample}
+
+
+
+file_path <- "Canada_main_MC_MCMC_sample.tab"  # written by Canada_main_MC.cmd in this folder
+
+# Read the tab-separated file
+df <- fread(file_path, check.names = FALSE)
+
+
+
+```
+
+
+```{r }
+
+
+
+
+# Replace dots in column names with spaces or underscores
+new_column_names <- gsub("\\.", " ", names(df))
+setnames(df, new_column_names)
+
+# Set sample size
+sample_size <- 5000
+
+# Random sampling (seed fixed so the same 5,000 draws are selected every time)
+set.seed(1)
+df_sample <- df[sample(.N, sample_size)]
+
+
+# Clean again after sampling (extra safety)
+df_sample <- df_sample[, which(colSums(!is.na(df_sample) & df_sample != "") > 0), with = FALSE]
+
+# Add "Seed noise" column: unique IDs from 1 to N
+df_sample[, `Seed noise` := seq_len(.N)]
+
+
+# Save the sampled data as a TAB-separated file
+fwrite(
+  df_sample,
+  "Canada_main_MC_MCMC_sample_frac.tab",
+  sep = "\t",
+  row.names = FALSE,
+  quote = FALSE
+)
+
+# Display first few rows of the sampled data
+head(df_sample)
+
+```
+
+

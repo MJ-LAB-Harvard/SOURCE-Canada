@@ -1,0 +1,118 @@
+---
+title: "SOURCE-CA: Table S7, 2036 change by opioid type (20%)"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+<!--
+Table S7: percent change in 2036 relative to the base scenario for the twelve individual strategies (20% change), by prescription opioids (Rx), illegal opioids (IO) and all opioids combined.
+Run from this folder. Reads Vensim results from results/ or this folder; writes to "figures and tables/".
+-->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+library(scales)
+library(svglite)
+
+results_dir <- "results"
+# The .cmd files write their CSVs to the project folder; use results/ if the file was moved there
+find_result <- function(f) if (file.exists(file.path(results_dir, f))) file.path(results_dir, f) else f
+figures_dir <- "figures and tables"
+dir.create(figures_dir, showWarnings = FALSE)
+```
+
+```{r settings}
+level <- "20"
+var_lookup <- tribble(
+  ~variable,                   ~Outcome, ~Substance,
+  "Noise PWURx NP",           "PWUIO-RxNP", "Rx",
+  "Noise NDHU",                "PWUIO-RxNP", "IO",
+  "Pol total PWURx NP and NDHU", "PWUIO-RxNP", "All opioids combined",
+  "Noise Rx OUD",              "OUD",    "Rx",
+  "Noise HUD",                 "OUD",    "IO",
+  "Pol total UD",              "OUD",    "All opioids combined",
+  "Noise Rx death",            "Death",  "Rx",
+  "Noise synth death",         "Death",  "IO",
+  "Pol total death",           "Death",  "All opioids combined"
+)
+outcomes <- var_lookup$variable
+
+strategy_labels <- c(
+  "DivRxInit"   = "(1) Reduce diverted Rx initiation",
+  "HInit"       = "(2) Reduce heroin/illegal synthetic opioid initiation",
+  "OwnRxInit"   = "(3) Reduce Rx use in a manner other than directed",
+  "RxRate"      = "(4) Reduce number of people who receive Rx",
+  "DevOUD"      = "(5) Reduce opioid use disorder development",
+  "ReturntoOUD" = "(6) Reduce return to opioid use disorder",
+  "PeerRec"     = "(7) Add peer recovery reinforcing loop",
+  "FentODRisk"  = "(8) Reduce overdose risk with fentanyl",
+  "NxKits"      = "(9) Increase distribution of Nx kits",
+  "ODwitnessed" = "(10) Increase probability of OD to be witnessed",
+  "TxSeeking"   = "(11) Increase treatment seeking",
+  "TxDuration"  = "(12) Increase treatment retention"
+)
+```
+
+```{r read-helper}
+# Read one Vensim sensitivity CSV (one row per posterior draw; columns "T<k> <variable>",
+# T0 = 2009) and return long format: sim_run, year, variable, scenario, value
+read_long <- function(file, scenario, outcomes) {
+  dt   <- fread(find_result(file))
+  cols <- grep(paste0("^T\\d+ (", paste(outcomes, collapse = "|"), ")$"), names(dt), value = TRUE)
+  if (length(cols) == 0) stop("No outcome columns found in ", file)
+  dt   <- dt[, ..cols][, sim_run := .I]
+  long <- melt(dt, id.vars = "sim_run", variable.name = "temp_col", value.name = "value")
+  long[, `:=`(year     = 2009L + as.integer(str_extract(temp_col, "(?<=^T)\\d+")),
+              variable = str_remove(temp_col, "^T\\d+ "),
+              scenario = scenario)]
+  long[, .(sim_run, year, variable, scenario, value)]
+}
+
+# Percent change of each run relative to the base run, matched by posterior draw
+pct_change_summary <- function(runs, base) {
+  pct <- merge(runs, base[, .(sim_run, year, variable, base_val = value)],
+               by = c("sim_run", "year", "variable"))
+  pct[, pct_change := 100 * (value - base_val) / base_val]
+  pct[year >= 2024,
+      .(mean_pct_change = mean(pct_change),
+        lower           = quantile(pct_change, 0.05),
+        upper           = quantile(pct_change, 0.95)),
+      by = .(scenario, year, variable)]
+}
+```
+
+```{r read-data}
+base <- read_long(sprintf("Pol_Base_singles%s.csv", level), "Base", outcomes)
+runs <- rbindlist(lapply(names(strategy_labels), function(s)
+  read_long(sprintf("Pol_%s_sens%s.csv", s, level), s, outcomes)))
+
+pct <- merge(runs[year == 2036], base[year == 2036, .(sim_run, variable, base_val = value)],
+             by = c("sim_run", "variable"))
+pct[, pct_change := 100 * (value - base_val) / base_val]
+```
+
+```{r table-S7}
+table_S7 <- pct %>%
+  inner_join(var_lookup, by = "variable") %>%
+  group_by(scenario, Outcome, Substance) %>%
+  summarize(mean_pct = mean(pct_change),
+            lower    = quantile(pct_change, 0.05),
+            upper    = quantile(pct_change, 0.95), .groups = "drop") %>%
+  mutate(value    = sprintf("%.1f%% (%.1f%%, %.1f%%)", mean_pct, lower, upper),
+         Strategy = factor(strategy_labels[scenario], levels = strategy_labels),
+         Outcome  = factor(Outcome, levels = c("PWUIO-RxNP", "OUD", "Death")),
+         Substance = factor(Substance, levels = c("Rx", "IO", "All opioids combined"))) %>%
+  select(Strategy, Outcome, Substance, value) %>%
+  pivot_wider(names_from = Substance, values_from = value) %>%
+  select(Strategy, Outcome, Rx, IO, `All opioids combined`) %>%
+  arrange(Strategy, Outcome)
+
+knitr::kable(table_S7)
+fwrite(table_S7, file.path(figures_dir, "Table S7.csv"))
+```

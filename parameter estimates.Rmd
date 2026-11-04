@@ -1,0 +1,118 @@
+---
+title: "SOURCE-CA: Table S5, estimated parameters (mean and 90% credible interval)"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+<!--
+Table S5: mean and 90% credible interval (5th-95th percentiles) of each calibrated parameter over the
+5,000 posterior draws (Canada_main_MC_MCMC_sample_frac.tab).
+Run from the project folder; writes "figures and tables/Table S5.csv".
+Parameters fixed during the calibration (set in BoundsStart.cin) are not listed.
+Number format: People/Year whole numbers; values >= 0.01 with 3 decimals; values < 0.01 in scientific notation.
+The initial stock correction factors are calibrated but not listed.
+-->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(data.table)
+library(dplyr)
+library(stringr)
+
+figures_dir <- "figures and tables"
+dir.create(figures_dir, showWarnings = FALSE)
+```
+
+```{r labels}
+# Model variable name -> name and unit used in Table S5
+# (parameters mentioning heroin (H) also include other illegal and synthetic opioids)
+param_labels <- tibble::tribble(
+  ~model_name,                                                ~table_name,                                                              ~unit,
+  "Developing HUD rate no Rx OUD",                            "Developing HUD rate no Rx OUD",                                          "1/Year",
+  "Developing HUD rate with Rx OUD",                          "Developing HUD rate with Rx OUD",                                        "1/Year",
+  "Developing Rx OUD rate",                                   "Developing Rx OUD rate",                                                 "1/Year",
+  "Fraction Nx kits to NDHU Rx OUD with PY heroin and HUD",   "Fraction Nx kits to PWUH",                                               "Dmnl",
+  "Initiating heroin no Rx base",                             "Initiating heroin no Rx base",                                           "People/Year",
+  "Initiating Rx NP diverted base",                       "Initiating Rx use not as prescribed diverted base",                      "People/Year",
+  "Initiation rate heroin with Rx NP",                    "Initiation rate heroin with Rx use not as prescribed",                   "1/Year",
+  "Initiation rate heroin with Rx OUD relative to Rx NP", "Initiation rate heroin with Rx OUD relative to Rx use not as prescribed", "Dmnl",  
+  "Net quit rate heroin with Rx NP",                      "Net quit rate heroin with Rx use not as prescribed",                     "1/Year",
+  "Net quit rate heroin with Rx OUD",                         "Net quit rate heroin with Rx OUD",                                       "1/Year",
+  "Net quit rate NDHU",                                       "Net quit rate NDHU",                                                     "1/Year",
+  "Net quit rate Rx NP",                                  "Net quit rate Rx use not as prescribed",                                 "1/Year",
+  "Nx kit distribution efficiency",                           "Nx kit distribution efficiency",                                         "Dmnl",
+  "Overdose rate base HUD",                                   "Overdose rate base HUD",                                                 "1/Year",
+  "Overdose rate NDHU relative to HUD",                       "Overdose rate NDHU relative to HUD",                                     "Dmnl",  
+  "Overdose rate base Rx NP",                             "Overdose rate base Rx use not as prescribed",                            "1/Year",
+  "Overdose rate base Rx OUD",                                "Overdose rate base Rx OUD",                                              "1/Year",
+  "Overdose rate synth baseline",                             "Overdose rate synth baseline",                                           "1/Year",
+  "Base survival probability H OD relative to Rx",            "Base survival probability H OD relative to Rx",                          "Dmnl",
+  "Base survival probability Rx OD",                          "Base survival probability Rx OD",                                        "Dmnl",
+  "Fentanyl effect on base survival max relative to H",       "Fentanyl effect on base survival max relative to H",                     "Dmnl",
+  "Fentanyl effect on OD rate H max",                         "Fentanyl effect on OD rate H max",                                       "Dmnl",
+  "Relapse rate HUD",                                         "Recurrence of use rate HUD",                                             "1/Year",
+  "Relapse rate Rx OUD relative to HUD",                      "Recurrence of use rate Rx OUD relative to HUD",                          "Dmnl",  
+  "Remission rate Rx OUD relative to HUD",                    "Remission rate Rx OUD relative to HUD",                                  "Dmnl",  
+  "Tx seeking rate Rx OUD no H total",                        "Tx seeking rate Rx OUD no H total",                                      "1/Year",
+  "Tx seeking fraction Bup Rx OUD",                           "Tx seeking fraction Bup Rx OUD",                                         "Dmnl",
+  "Tx seeking fraction Bup HUD",                              "Tx seeking fraction Bup HUD",                                            "Dmnl",
+  "Tx average duration Bup",                                  "Tx average duration Bup",                                                "Year",
+  "Tx average duration MMT",                                  "Tx average duration MMT",                                                "Year",
+  "Perceived risk strength initiating heroin with Rx use",    "Perceived risk strength initiating heroin with Rx use",                  "Dmnl",
+  "Perceived risk strength initiating NDHU no Rx",            "Perceived risk strength initiating NDHU no Rx",                          "Dmnl",
+  "Perceived risk strength initiating Rx NP diverted",    "Perceived risk strength initiating Rx use not as prescribed diverted",   "Dmnl",
+  "Perceived risk strength initiating Rx NP own Rx",      "Perceived risk strength initiating Rx use not as prescribed own Rx",     "Dmnl",
+  "Perceived risk strength net quit heroin with Rx OUD",      "Perceived risk strength net quit heroin with Rx OUD",                    "Dmnl",
+  "Perceived risk strength net quit NDHU",                    "Perceived risk strength net quit NDHU",                                  "Dmnl",
+  "Perceived risk strength net quit NDHU with Rx",            "Perceived risk strength net quit NDHU with Rx",                          "Dmnl",
+  "Perceived risk strength net quit Rx NP",               "Perceived risk strength net quit Rx use not as prescribed",              "Dmnl"
+)
+```
+
+```{r read}
+# Posterior draws used for all projections
+draws <- fread("Canada_main_MC_MCMC_sample_frac.tab", check.names = FALSE)
+names(draws) <- str_squish(names(draws))
+
+# Parameters fixed during the calibration (set in BoundsStart.cin, not in the draws) are not listed
+fixed_lines <- readLines("BoundsStart.cin", warn = FALSE)
+fixed <- tibble(model_name = str_squish(str_match(fixed_lines, "^(.*?)=")[, 2])) %>%
+  filter(!is.na(model_name), !model_name %in% names(draws))
+
+ranges <- tibble(
+  model_name = param_labels$model_name,
+  estimate = sapply(param_labels$model_name, function(v) if (v %in% names(draws)) mean(draws[[v]]) else NA_real_),
+  lower = sapply(param_labels$model_name, function(v) if (v %in% names(draws)) quantile(draws[[v]], 0.05) else NA_real_),
+  upper = sapply(param_labels$model_name, function(v) if (v %in% names(draws)) quantile(draws[[v]], 0.95) else NA_real_)
+)
+stopifnot(all(param_labels$model_name %in% c(names(draws), fixed$model_name)))
+```
+
+```{r table-S5}
+# Number format: People/Year as whole numbers; values of 0.01 or more with 3 decimals;
+# values below 0.01 in scientific notation with 2 decimals (e.g. 2.67×10⁻³), so small values are never rounded to 0
+sup <- c("-" = "\u207b", "0" = "\u2070", "1" = "\u00b9", "2" = "\u00b2", "3" = "\u00b3", "4" = "\u2074",
+         "5" = "\u2075", "6" = "\u2076", "7" = "\u2077", "8" = "\u2078", "9" = "\u2079")
+fmt1 <- function(x, unit) {
+  if (is.na(x)) return("NA")
+  if (unit == "People/Year") return(formatC(round(x), format = "d", big.mark = ","))
+  if (x != 0 && abs(x) < 0.01) {
+    e <- floor(log10(abs(x))); m <- round(x / 10^e, 2)
+    if (abs(m) >= 10) { m <- m / 10; e <- e + 1 }
+    return(paste0(formatC(m, format = "f", digits = 2), "\u00d710",
+                  paste(sup[strsplit(as.character(e), "")[[1]]], collapse = "")))
+  }
+  formatC(x, format = "f", digits = 3, big.mark = ",")
+}
+fmt <- function(x, unit) mapply(fmt1, x, unit)
+
+table_S5 <- param_labels %>%
+  filter(!model_name %in% fixed$model_name) %>%
+  left_join(ranges, by = "model_name") %>%
+  mutate(`Mean (90% credible interval)` = paste0(fmt(estimate, unit), " (", fmt(lower, unit), ", ", fmt(upper, unit), ")")) %>%
+  select(Variable = table_name, Unit = unit, `Mean (90% credible interval)`,
+         model_name, estimate, lower, upper)
+
+knitr::kable(table_S5 %>% select(Variable, Unit, `Mean (90% credible interval)`))
+fwrite(table_S5, file.path(figures_dir, "Table S5.csv"), bom = TRUE)
+```

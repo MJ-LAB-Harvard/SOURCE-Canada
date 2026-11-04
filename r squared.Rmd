@@ -1,0 +1,174 @@
+---
+title: "SOURCE-CA: model fit (Table S4, Figure S3)"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+<!--
+Table S4 (fit metrics) and Figure S3 (model fit to calibration data).
+Input: squaredrun.csv (results/ or the project folder) from Canada_projection_rsquared.cmd (5,000 posterior draws,
+variables sim1-sim10 = model, data1-data10 = data; listed in savelist_rsquared_SOURCE_CA.lst).
+Run from the project folder; writes "Table S4.csv" and "Figure S3.svg" to "figures and tables/".
+-->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+library(scales)
+library(svglite)
+
+results_dir <- "results"
+# The .cmd files write their CSVs to the project folder; use results/ if the file was moved there
+find_result <- function(f) if (file.exists(file.path(results_dir, f))) file.path(results_dir, f) else f
+figures_dir <- "figures and tables"
+dir.create(figures_dir, showWarnings = FALSE)
+```
+
+```{r read}
+data_raw <- fread(find_result("squaredrun.csv"), check.names = FALSE)
+names(data_raw) <- str_squish(gsub("\\.", " ", names(data_raw)))
+data_raw <- data_raw %>% select(matches("^T\\d+\\s+(sim|data)\\d+$"))
+
+## 1) Long format: year + variable (sim#/data#) + value; T0 = 2009
+df_long <- data_raw %>%
+  mutate(sim_run = row_number()) %>%
+  pivot_longer(-sim_run, names_to = "temp_col", values_to = "value") %>%
+  mutate(year     = 2009 + as.integer(str_extract(temp_col, "(?<=^T)\\d+")),
+         variable = str_extract(temp_col, "(sim|data)\\d+$")) %>%
+  select(sim_run, year, variable, value)
+
+## 2) Mean across the 5,000 posterior draws
+df_mean <- df_long %>%
+  group_by(year, variable) %>%
+  summarize(mean_value = mean(value, na.rm = TRUE), .groups = "drop")
+```
+
+```{r pair}
+## 3) Years with observed (non-interpolated) data for each series
+allowed_years <- list(
+  `1`  = c(2009,2010,2011,2012,2013,2014,2015,2017,2019,2023),
+  `2`  = c(2009,2010,2011,2012,2013,2014,2015,2017,2019,2023),
+  `3`  = c(2009,2010,2011,2012,2013,2014,2015,2017,2019,2023),
+  `4`  = c(2009,2011,2012,2014,2015,2017,2019,2023),
+  `5`  = c(2009,2010,2011,2012,2013,2014,2015,2017,2019,2023),
+  `6`  = 2009:2023,
+  `7`  = 2016:2023,
+  `8`  = 2011:2023,
+  `9`  = 2011:2023,
+  `10` = 2009:2025
+)
+
+var_names <- tibble::tribble(
+  ~id, ~name,                                                                          ~y_max,
+  1,  "Rx opioid use not as prescribed, no past year heroin/illegal synthetics use",  2000000,
+  2,  "Rx OUD, no past year heroin/illegal synthetic use",                          600000,
+  3,  "Rx OUD with past year heroin/illegal synthetics use",                         200000,
+  4,  "Past year heroin/illegal synthetics use without OUD",                         800000,
+  5,  "Heroin/illegal synthetics OUD",                                               200000,
+  6,  "Buprenorphine receipt",                                                       80000,
+  7,  "Methadone receipt",                                                           60000,
+  8,  "Rx overdose deaths",                                                          2000,
+  9,  "Heroin/illegal synthetics overdose deaths",                                   15000,
+  10, "Total overdose deaths",                                                       15000
+)
+
+## 4) Pair model and data by series id, keep years with observed data
+sim_mean  <- df_mean %>% filter(str_detect(variable, "^sim"))  %>%
+  transmute(year, id = as.integer(str_remove(variable, "^sim")),  sim  = mean_value)
+data_mean <- df_mean %>% filter(str_detect(variable, "^data")) %>%
+  transmute(year, id = as.integer(str_remove(variable, "^data")), data = mean_value)
+
+paired <- sim_mean %>%
+  inner_join(data_mean, by = c("year", "id")) %>%
+  filter(mapply(function(y, i) y %in% allowed_years[[as.character(i)]], year, id)) %>%
+  arrange(id, year) %>%
+  left_join(var_names, by = "id")
+
+paired %>% group_by(id, name) %>%
+  summarize(n_years = n(), years_used = paste(year, collapse = ","), .groups = "drop")
+```
+
+```{r metrics}
+r2_cor <- function(a, f) {
+  ok <- !is.na(a) & !is.na(f)
+  if (sum(ok) < 2) return(NA_real_)
+  cor(a[ok], f[ok])^2
+}
+me  <- function(a, f) mean(f - a, na.rm = TRUE)          # signed mean error (model - data)
+mae <- function(a, f) mean(abs(f - a), na.rm = TRUE)
+theil_u2 <- function(a, f) {
+  ok <- !is.na(a) & !is.na(f); a <- a[ok]; f <- f[ok]
+  if (length(a) < 3) return(NA_real_)
+  a_lag <- dplyr::lag(a); ok2 <- !is.na(a_lag)
+  rmse_model <- sqrt(mean((f[ok2] - a[ok2])^2))
+  rmse_naive <- sqrt(mean((a[ok2] - a_lag[ok2])^2))
+  if (is.na(rmse_naive) || rmse_naive < 1e-9) return(NA_real_)
+  rmse_model / rmse_naive
+}
+smape_pct <- function(a, f, tol = 1e-9) {
+  ok <- !is.na(a) & !is.na(f) & (abs(a) + abs(f)) > tol
+  if (sum(ok) == 0) return(NA_real_)
+  mean(2 * abs(f[ok] - a[ok]) / (abs(a[ok]) + abs(f[ok]))) * 100
+}
+
+metrics_by_series <- paired %>%
+  group_by(id, name) %>%
+  summarize(n_data_years = sum(!is.na(data)),
+            R2        = r2_cor(data, sim),
+            ME        = me(data, sim),
+            MAE       = mae(data, sim),
+            SMAPE_pct = smape_pct(data, sim),
+            Theil_U2  = theil_u2(data, sim),
+            .groups = "drop") %>%
+  arrange(id)
+
+overall_row <- metrics_by_series %>%
+  summarize(name = "Average across series", n_data_years = NA_integer_,
+            R2 = mean(R2, na.rm = TRUE), ME = NA_real_, MAE = NA_real_,
+            SMAPE_pct = mean(SMAPE_pct, na.rm = TRUE), Theil_U2 = NA_real_)
+
+table_S4 <- bind_rows(metrics_by_series, overall_row) %>%
+  select(`Time series` = name, `Data years` = n_data_years, R2, `Mean Error` = ME,
+         `Mean Absolute Error` = MAE, `SMAPE (%)` = SMAPE_pct, `Theil's U2` = Theil_U2) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 2)))
+
+knitr::kable(table_S4, format.args = list(big.mark = ","))
+fwrite(table_S4, file.path(figures_dir, "Table S4.csv"))
+```
+
+```{r figure-S3, fig.align="center", echo = FALSE, fig.width = 8, fig.height = 10}
+## plot only years that have data (e.g. NDHU after 2019 is not a model data point)
+paired <- paired %>% filter(!is.na(data)) %>% mutate(name = factor(name, levels = var_names$name))
+## y-axis range per panel: 0 to y_max, except methadone (narrow range so the fit is visible)
+y_min  <- ifelse(var_names$id == 7, 40000, 0)
+y_lim  <- bind_rows(var_names %>% mutate(y = y_min), var_names %>% mutate(y = y_max)) %>%
+  mutate(name = factor(name, levels = var_names$name))
+
+p_fit <- ggplot(paired, aes(x = year)) +
+  geom_blank(data = y_lim, aes(x = 2009, y = y)) +
+  geom_line(aes(y = sim, colour = "Simulation"), linewidth = 1) +
+  geom_point(aes(y = data, colour = "Observed data"), size = 1.5) +
+  facet_wrap(~ name, scales = "free_y", ncol = 2, labeller = label_wrap_gen(width = 40)) +
+  scale_colour_manual(name = NULL, values = c("Simulation" = "#1F78B4", "Observed data" = "black")) +
+  scale_x_continuous(breaks = 2009:2025) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(x = NULL, y = NULL) +
+  theme_bw() +
+  theme(panel.grid  = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 9),
+        axis.text.y = element_text(size = 9),
+        strip.text  = element_text(face = "bold", size = 10),
+        legend.position = "bottom",
+        legend.text = element_text(size = 11))
+
+print(p_fit)
+```
+
+```{r save}
+ggsave(file.path(figures_dir, "Figure S3.svg"), p_fit, width = 8, height = 10, units = "in", dpi = 300)
+```

@@ -1,0 +1,540 @@
+---
+title: "Projection end values (Figure S2, Table S1)"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+<!--
+Figure S2 and the projection end values used in ProjEndValsCA_{base,optimistic,pessimistic}.cin.
+Run from the project folder; reads "Data imported into Vensim.xlsx" (sheet ProjEndVals), writes to "figures and tables/".
+-->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(readxl)
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(purrr)
+library(scales)
+
+figures_dir <- "figures and tables"
+dir.create(figures_dir, showWarnings = FALSE)
+
+
+raw_data <- read_excel("Data imported into Vensim.xlsx", sheet = "ProjEndVals")
+
+
+years <- as.numeric(colnames(raw_data)[-1])
+
+processed_data <- pivot_longer(
+  raw_data, 
+  cols = -1, 
+  names_to = "Year", 
+  values_to = "Value", 
+  names_prefix = "Year_", # Remove any prefix like "Year_" from column names
+  values_drop_na = TRUE # Drop rows with NA values in "Value"
+)
+
+# Rename the first column 
+colnames(processed_data)[1] <- "Variable"
+
+# Convert the Year column to numeric 
+processed_data$Year <- as.numeric(processed_data$Year)
+
+
+
+```
+
+
+This list is to adjust the fit type and years of data to fit
+
+```{r}
+
+settings <- list(
+  "fentanyl penetration" = list(function_type = "saturating", last_years = 4),
+  "Nx kits distributed" = list(function_type = "linear", last_years = 6),
+  "Bup capacity" = list(function_type = "linear", last_years = 5),
+  "MMT capacity" = list(function_type = "linear", last_years = 3),
+  "patients with opioid prescription" = list(function_type = "logarithmic", last_years = 3),
+  "prescriptions per person" = list(function_type = "logarithmic", last_years = 3),
+  "days per prescription" = list(function_type = "logarithmic", last_years = 5),
+  "average MME per day" = list(function_type = "logarithmic", last_years = 4),
+  "ADF fraction of prescribed Rx opioids" = list(function_type = "logarithmic", last_years = 4)
+)
+
+sim_final_time <- 2036
+
+
+
+```
+
+
+This list is to adjust how much the end values should deviate 
+
+```{r }
+
+
+scenario_assumptions <- list(
+  "fentanyl penetration" = list(Base = 0.95, Optimistic = 0.80, Pessimistic = 1.00),
+  "Nx kits distributed"  = list(Optimistic = 1.2,  Pessimistic = 0.8),
+  "Bup capacity"         = list(Optimistic = 1.2,  Pessimistic = 0.8),
+  "MMT capacity"         = list(Optimistic = 1.2,  Pessimistic = 0.8),
+  "patients with opioid prescription" = list(Optimistic = 0.9,  Pessimistic = 1.1),
+  "prescriptions per person"          = list(Optimistic = 0.8,  Pessimistic = 1.2),
+  "days per prescription"             = list(Optimistic = 0.8,  Pessimistic = 1.2),
+  "average MME per day"               = list(Optimistic = 0.9,  Pessimistic = 1.1),
+  "ADF fraction of prescribed Rx opioids" = list(Optimistic = 1.5,  Pessimistic = 0.5)
+)
+
+
+
+scenario_assumptions20 <- list(
+  "fentanyl penetration" = list(Base = 1.00, Optimistic = 1.00, Pessimistic = 1.00),
+  "Nx kits distributed"  = list(Optimistic = 1.2,  Pessimistic = 0.8),
+  "Bup capacity"         = list(Optimistic = 1.2,  Pessimistic = 0.8),
+  "MMT capacity"         = list(Optimistic = 1.2,  Pessimistic = 0.8),
+  "patients with opioid prescription" = list(Optimistic = 0.8,  Pessimistic = 1.2),
+  "prescriptions per person"          = list(Optimistic = 0.8,  Pessimistic = 1.2),
+  "days per prescription"             = list(Optimistic = 0.8,  Pessimistic = 1.2),
+  "average MME per day"               = list(Optimistic = 0.8,  Pessimistic = 1.2),
+  "ADF fraction of prescribed Rx opioids" = list(Optimistic = 1.2,  Pessimistic = 0.8)
+)
+
+
+# Pick which assumption list to be used:
+scenario_use <- scenario_assumptions
+
+```
+
+
+
+```{r}
+
+# Upper-half logistic curve on x_start:x_end (NO extension beyond x_end)
+
+logistic_upper_half <- function(x_start, x_end, y_start, y_end, k = 5) {
+  xs <- seq(x_start, x_end, by = 1)
+
+  numerator <- (y_end - y_start) / 0.5
+  raw_curve <- numerator / (1 + exp((-k / (x_end - x_start)) * (xs - x_start))) +
+    (y_end - numerator)
+
+  bounded <- if (y_end > y_start) pmin(y_end, raw_curve) else pmax(y_end, raw_curve)
+
+  offset <- bounded[1] - y_start
+  ys <- bounded - offset
+
+  tibble(Year = xs, Value = ys)
+}
+
+# Predict end value specifically at sim_final_time from a model fit on recent_data
+fit_end_value_at_final <- function(recent_data, ftype, sim_final_time) {
+
+  if (ftype == "linear") {
+    m <- lm(Value ~ Year, data = recent_data)
+    y_end <- predict(m, newdata = data.frame(Year = sim_final_time))
+
+  } else if (ftype == "logarithmic") {
+    m <- lm(log(Value) ~ Year, data = recent_data)
+    y_end <- exp(predict(m, newdata = data.frame(Year = sim_final_time)))
+
+  } else if (ftype == "saturating") {
+    m <- tryCatch(
+      nls(Value ~ 1/(1 + exp(-(a + b*Year))),
+          data = recent_data,
+          start = list(a = 0, b = 0.1),
+          control = nls.control(warnOnly = TRUE, maxiter = 200)),
+      error = function(e) NULL
+    )
+
+    if (is.null(m)) {
+      m2 <- lm(Value ~ Year, data = recent_data)
+      y_end <- predict(m2, newdata = data.frame(Year = sim_final_time))
+    } else {
+      y_end <- predict(m, newdata = data.frame(Year = sim_final_time))
+    }
+
+  } else stop("Unknown function type")
+
+  as.numeric(y_end)
+}
+
+
+all_combined_data <- list()
+
+for (variable in names(settings)) {
+
+  filtered_data <- processed_data %>%
+    filter(Variable == variable, !is.na(Value)) %>%
+    arrange(Year)
+
+  ftype <- settings[[variable]]$function_type
+  if (ftype %in% c("logarithmic", "saturating")) {
+    filtered_data <- filtered_data %>% filter(Value > 0)
+  }
+
+  last_years_n <- settings[[variable]]$last_years
+  recent_data <- tail(filtered_data, min(last_years_n, nrow(filtered_data)))
+
+  if (nrow(recent_data) < 2) next
+
+  if (ftype == "linear") {
+    model <- lm(Value ~ Year, data = recent_data)
+  } else if (ftype == "logarithmic") {
+    model <- lm(log(Value) ~ Year, data = recent_data)
+  } else if (ftype == "saturating") {
+    model <- tryCatch(
+      nls(Value ~ 1/(1 + exp(-(a + b*Year))),
+          data = recent_data,
+          start = list(a = 0, b = 0.1),
+          control = nls.control(warnOnly = TRUE, maxiter = 200)),
+      error = function(e) NULL
+    )
+    if (is.null(model)) {
+      model <- lm(Value ~ Year, data = recent_data)
+      ftype <- "linear"
+    }
+  } else stop("Invalid function type.")
+
+  last_year <- max(recent_data$Year)
+  future_years <- (last_year + 1):sim_final_time
+  if (length(future_years) == 0) next
+
+  if (ftype == "linear") {
+    future_values <- predict(model, newdata = data.frame(Year = future_years))
+    fitted_values <- predict(model, newdata = recent_data)
+  } else if (ftype == "logarithmic") {
+    future_values <- exp(predict(model, newdata = data.frame(Year = future_years)))
+    fitted_values <- exp(predict(model, newdata = recent_data))
+  } else {
+    future_values <- predict(model, newdata = data.frame(Year = future_years))
+    fitted_values <- predict(model, newdata = recent_data)
+  }
+
+  projection <- data.frame(Year = future_years, Value = future_values, Type = "Projected")
+  fitted     <- data.frame(Year = recent_data$Year, Value = fitted_values, Type = "Fitted")
+  actual     <- data.frame(Year = filtered_data$Year, Value = filtered_data$Value, Type = "Actual")
+
+  combined_data <- rbind(actual, fitted, projection)
+  combined_data$Variable <- variable
+  all_combined_data[[variable]] <- combined_data
+}
+
+final_combined_data <- do.call(rbind, all_combined_data)
+
+f_var <- "fentanyl penetration"
+
+if (f_var %in% names(scenario_use)) {
+  # last observed fentanyl point (from processed_data)
+  f_obs <- processed_data %>%
+    filter(Variable == f_var, !is.na(Value)) %>%
+    arrange(Year)
+
+  x0 <- max(f_obs$Year)
+  y0 <- f_obs$Value[f_obs$Year == x0][1]
+
+  if (x0 < sim_final_time) {
+    y_end <- scenario_use[[f_var]]$Base
+
+    # build S-curve from last observed -> sim_final_time
+    f_scurve <- logistic_upper_half(x0, sim_final_time, y0, y_end, k = 5)
+
+    # Replace the projected segment in final_combined_data for fentanyl
+    final_combined_data <- final_combined_data %>%
+      filter(!(Variable == f_var & Type == "Projected")) %>%
+      bind_rows(
+        tibble(
+          Year = f_scurve$Year[f_scurve$Year > x0],   # only future years
+          Value = f_scurve$Value[f_scurve$Year > x0],
+          Type = "Projected",
+          Variable = f_var
+        )
+      ) %>%
+      arrange(Variable, Year)
+  }
+}
+
+
+base_info <- list()
+all_base_data <- list()
+
+for (v in names(settings)) {
+
+  df <- processed_data %>%
+    filter(Variable == v, !is.na(Value)) %>%
+    arrange(Year)
+
+  ftype <- settings[[v]]$function_type
+  if (ftype %in% c("logarithmic", "saturating")) df <- df %>% filter(Value > 0)
+  if (nrow(df) < 2) next
+
+  recent_data <- df %>% tail(min(settings[[v]]$last_years, nrow(df)))
+
+  x0 <- max(df$Year)
+  y0 <- df$Value[df$Year == x0][1]
+
+  obs_df <- df %>%
+    mutate(Scenario = "Observed") %>%
+    select(Year, Value, Variable, Scenario)
+
+  if (x0 >= sim_final_time) {
+    all_base_data[[v]] <- obs_df
+    next
+  }
+
+  # Base end value:
+  # - fentanyl: Base end value from the scenario list
+  # - others: end value from model prediction at 2036
+  
+  if (v == "fentanyl penetration" && v %in% names(scenario_use) && !is.null(scenario_use[[v]]$Base)) {
+    y_end_base <- scenario_use[[v]]$Base
+  } else {
+    y_end_base <- fit_end_value_at_final(recent_data, ftype, sim_final_time)
+  }
+
+  base_info[[v]] <- list(
+    base_last_year  = x0,
+    base_last_value = y0,
+    base_end_year   = sim_final_time,
+    base_end_value  = y_end_base
+  )
+
+  base_curve <- logistic_upper_half(x0, sim_final_time, y0, y_end_base, k = 5) %>%
+    mutate(Variable = v, Scenario = "Base") %>%
+    select(Year, Value, Variable, Scenario)
+
+  all_base_data[[v]] <- bind_rows(obs_df, base_curve)
+}
+
+base_scenario_data <- bind_rows(all_base_data)
+
+
+all_scenario_data <- list()
+
+for (v in names(base_info)) {
+
+  x0       <- base_info[[v]]$base_last_year
+  y0       <- base_info[[v]]$base_last_value
+  x_end    <- sim_final_time
+  base_val <- base_info[[v]]$base_end_value
+
+  var_data <- base_scenario_data %>% filter(Variable == v)
+
+  # start with Observed + Base
+  out_df <- bind_rows(
+    var_data %>% filter(Scenario == "Observed"),
+    var_data %>% filter(Scenario == "Base")
+  )
+
+  if (!v %in% names(scenario_use)) {
+    all_scenario_data[[v]] <- out_df
+    next
+  }
+
+  if (v == "fentanyl penetration") {
+    # fentanyl end values come directly from scenario list
+    y_end_opt  <- scenario_use[[v]]$Optimistic
+    y_end_pess <- scenario_use[[v]]$Pessimistic
+
+  } else {
+    y_end_opt  <- base_val * scenario_use[[v]]$Optimistic
+    y_end_pess <- base_val * scenario_use[[v]]$Pessimistic
+  }
+
+  opt_curve <- logistic_upper_half(x0, x_end, y0, y_end_opt,  k = 5) %>%
+    mutate(Variable = v, Scenario = "Optimistic")
+
+  pess_curve <- logistic_upper_half(x0, x_end, y0, y_end_pess, k = 5) %>%
+    mutate(Variable = v, Scenario = "Pessimistic")
+
+  out_df <- bind_rows(out_df, opt_curve, pess_curve)
+  all_scenario_data[[v]] <- out_df
+}
+
+scenario_data <- bind_rows(all_scenario_data)
+
+```
+
+
+
+
+
+```{r ,  fig.width=15, fig.height=10}
+
+
+three_scenario_plot <- ggplot(scenario_data, aes(x = Year, y = Value, color = Scenario)) +
+  geom_line(size = 1) +
+  geom_point(data = subset(scenario_data, Scenario == "Observed"), size = 2) +
+  theme_minimal() +
+  facet_wrap(~ Variable, ncol = 3, scales = "free_y") +
+  scale_x_continuous(
+    breaks = seq(min(scenario_data$Year), max(scenario_data$Year), by = 1),
+    expand = expansion(mult = c(0.01, 0.01))
+  ) +
+  scale_y_continuous(labels = label_comma()) +
+  scale_color_manual(values = c(
+    "Observed"    = "black",
+    "Base"        = "orange",
+    "Optimistic"  = "darkgreen",
+    "Pessimistic" = "red"
+  )) +
+  labs(title = NULL, x = NULL, y = NULL, color = "Scenario") +
+  theme(
+    axis.text.x  = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 10),
+    axis.text.y  = element_text(size = 12),
+    legend.title = element_text(size = 14),
+    legend.text  = element_text(size = 12),
+    panel.grid   = element_blank(),
+    panel.border = element_rect(color = "black", fill = NA),
+    axis.ticks   = element_line(color = "black"),
+    strip.text   = element_text(face = "bold", size = 12)
+  )
+
+
+# Overlay: scenarios + fitted/projected
+custom_label <- as_labeller(c(
+  "ADF fraction of prescribed Rx opioids" = "Abuse deterrent fraction of Rx opioids",
+  "average MME per day" = "Average morphine mg equivalents per day",
+  "Bup capacity" = "Buprenorphine capacity",
+  "days per prescription" = "Days per opioid prescription",
+  "fentanyl penetration" = "Fentanyl penetration",
+  "MMT capacity" = "Methadone capacity",
+  "Nx kits distributed" = "Naloxone kits distributed",
+  "patients with opioid prescription" = "Total patients with opioid prescription",
+  "prescriptions per person" = "Opioid prescriptions per person"
+))
+
+fitted_data <- subset(final_combined_data, Type == "Fitted")
+projected_data <- subset(final_combined_data, Type == "Projected")
+
+projected_data$Scenario <- "Projected"
+projected_data <- projected_data[, c("Year", "Value", "Variable", "Scenario")]
+
+fitted_data$Scenario <- "Fitted"
+fitted_data <- fitted_data[, c("Year", "Value", "Variable", "Scenario")]
+
+plot_data <- rbind(scenario_data, fitted_data, projected_data)
+
+three_scenario_plot_fit <- ggplot() +
+  geom_line(data = subset(plot_data, !Scenario %in% "Fitted"),
+            aes(x = Year, y = Value, color = Scenario, linetype = Scenario), size = 1) +
+  geom_point(data = subset(plot_data, Scenario == "Observed"),
+             aes(x = Year, y = Value, color = Scenario), size = 2) +
+  geom_line(data = subset(plot_data, Scenario == "Fitted"),
+            aes(x = Year, y = Value, color = Scenario, linetype = Scenario), size = 1) +
+  facet_wrap(~ Variable, ncol = 3, scales = "free_y", labeller = custom_label) +
+  theme_minimal() +
+  scale_x_continuous(
+    breaks = seq(min(plot_data$Year), max(plot_data$Year), by = 1),
+    expand = expansion(mult = c(0.01, 0.01))
+  ) +
+  scale_y_continuous(labels = scales::label_comma()) +
+  scale_color_manual(
+    values = c(
+      "Observed"    = "grey",
+      "Fitted"      = "black",
+      "Projected"   = "black",
+      "Base"        = "orange",
+      "Optimistic"  = "darkgreen",
+      "Pessimistic" = "red"
+    ),
+    breaks = c("Fitted", "Optimistic", "Base", "Pessimistic")
+  ) +
+  scale_linetype_manual(
+    values = c(
+      "Observed"    = "solid",
+      "Fitted"      = "solid",
+      "Projected"   = "dotted",
+      "Base"        = "solid",
+      "Optimistic"  = "solid",
+      "Pessimistic" = "solid"
+    ),
+    breaks = c("Fitted", "Optimistic", "Base", "Pessimistic")
+  ) +
+  labs(title = NULL, x = NULL, y = NULL, color = NULL, linetype = NULL) +
+  theme(
+    axis.text.x  = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 12),
+    axis.text.y  = element_text(size = 13),
+    legend.title = element_blank(),
+    legend.text  = element_text(size = 15),
+     legend.position = "bottom",
+    panel.grid   = element_blank(),
+    panel.border = element_rect(color = "black", fill = NA),
+    axis.ticks   = element_line(color = "black"),
+    strip.text   = element_text(face = "bold", size = 12)
+  )
+
+print(three_scenario_plot_fit)
+
+
+
+
+
+```
+
+```{r }
+
+
+ggsave(file.path(figures_dir, "Figure S2.svg"), plot = three_scenario_plot_fit , width = 15, height = 10, units = "in", dpi = 300)
+
+
+```
+
+
+
+
+```{r}
+
+
+end_summaries <- scenario_data %>%
+  filter(Scenario %in% c("Base", "Optimistic", "Pessimistic")) %>%
+  group_by(Variable, Scenario) %>%
+  summarize(
+    end_Year  = max(Year),
+    end_Value = Value[Year == end_Year][1],
+    .groups   = "drop"
+  ) %>%
+  mutate(
+    end_Value = case_when(
+      end_Value > 100 ~ round(end_Value, 0),
+      end_Value > 1   ~ round(end_Value, 2),
+      TRUE            ~ round(end_Value, 3)  
+    ),
+    end_Value = comma(end_Value)
+  )
+
+cat("\nScenario End Summaries:\n")
+print(end_summaries)
+
+
+```
+
+```{r compare-cin}
+# Save the end values and compare them with the values entered in the Vensim .cin files
+fwrite_end <- end_summaries
+write.csv(fwrite_end, file.path(figures_dir, "Table S1_projection end values.csv"), row.names = FALSE)
+
+read_cin <- function(file, scenario) {
+  x <- readLines(file, warn = FALSE)
+  x <- trimws(x[grepl("^Projection curve end value", x)])
+  tibble(Variable = trimws(sub("^Projection curve end value (.*?)\\s*=.*$", "\\1", x)),
+         Scenario = scenario,
+         cin_value = as.numeric(trimws(sub("^.*=\\s*", "", x))))
+}
+cin_values <- bind_rows(read_cin("ProjEndValsCA_base.cin", "Base"),
+                        read_cin("ProjEndValsCA_optimistic.cin", "Optimistic"),
+                        read_cin("ProjEndValsCA_pessimistic.cin", "Pessimistic"))
+
+end_values_numeric <- scenario_data %>%
+  filter(Scenario %in% c("Base", "Optimistic", "Pessimistic"), Year == sim_final_time) %>%
+  select(Variable, Scenario, R_value = Value)
+
+cin_check <- end_values_numeric %>%
+  left_join(cin_values, by = c("Variable", "Scenario")) %>%
+  mutate(pct_difference = round(100 * (cin_value - R_value) / R_value, 2)) %>%
+  arrange(Variable, Scenario)
+
+knitr::kable(cin_check, digits = 4)
+```
