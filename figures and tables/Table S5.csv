@@ -1,0 +1,36 @@
+﻿Variable,Unit,Mean (90% credible interval),model_name,estimate,lower,upper
+Developing HUD rate no Rx OUD,1/Year,"0.062 (0.045, 0.080)",Developing HUD rate no Rx OUD,0.062032169167,0.044730156,0.079634418
+Developing HUD rate with Rx OUD,1/Year,"0.047 (0.025, 0.084)",Developing HUD rate with Rx OUD,0.047166856425,0.025,0.084173436
+Developing Rx OUD rate,1/Year,"0.022 (0.015, 0.031)",Developing Rx OUD rate,0.0216344703918,0.015213452,0.0307517095
+Fraction Nx kits to PWUH,Dmnl,"0.989 (0.987, 0.990)",Fraction Nx kits to NDHU Rx OUD with PY heroin and HUD,0.988826914848,0.98654442,0.99
+Initiating heroin no Rx base,People/Year,"15,504 (7,342, 25,442)",Initiating heroin no Rx base,15504.35602576,7341.9769,25442.48815
+Initiating Rx use not as prescribed diverted base,People/Year,"308,364 (228,959, 389,693)",Initiating Rx NP diverted base,308363.91436,228959.45,389692.63
+Initiation rate heroin with Rx use not as prescribed,1/Year,"6.83×10⁻³ (3.61×10⁻³, 0.010)",Initiation rate heroin with Rx NP,0.00682695255184,0.0036142236,0.010000127745
+Initiation rate heroin with Rx OUD relative to Rx use not as prescribed,Dmnl,"2.452 (1.516, 4.324)",Initiation rate heroin with Rx OUD relative to Rx NP,2.45178598006,1.5162935,4.324411245
+Net quit rate heroin with Rx use not as prescribed,1/Year,"0.016 (5.00×10⁻³, 0.035)",Net quit rate heroin with Rx NP,0.01597728725932,0.005,0.034900837
+Net quit rate heroin with Rx OUD,1/Year,"0.266 (0.207, 0.300)",Net quit rate heroin with Rx OUD,0.2655820985324,0.206666355,0.3
+Net quit rate NDHU,1/Year,"0.027 (0.025, 0.033)",Net quit rate NDHU,0.0273994461202,0.025,0.032543472
+Net quit rate Rx use not as prescribed,1/Year,"0.281 (0.210, 0.353)",Net quit rate Rx NP,0.280774383992,0.209733572,0.3530996
+Nx kit distribution efficiency,person/kit,"1.01×10⁻⁴ (1.00×10⁻⁴, 1.05×10⁻⁴)",Nx kit distribution efficiency,0.000100786460618,1e-04,0.00010487961
+Overdose rate base HUD,1/Year,"0.034 (0.025, 0.049)",Overdose rate base HUD,0.0343438719268,0.025,0.049145665
+Overdose rate NDHU relative to HUD,Dmnl,"0.129 (0.125, 0.141)",Overdose rate NDHU relative to HUD,0.129084558034,0.125,0.141101
+Overdose rate base Rx use not as prescribed,1/Year,"1.54×10⁻³ (5.00×10⁻⁴, 3.90×10⁻³)",Overdose rate base Rx NP,0.00153703123243,5e-04,0.0038973977
+Overdose rate base Rx OUD,1/Year,"0.098 (0.074, 0.130)",Overdose rate base Rx OUD,0.0982341100188,0.073666645,0.129781122
+Overdose rate synth baseline,1/Year,"3.14×10⁻³ (2.50×10⁻³, 3.96×10⁻³)",Overdose rate synth baseline,0.00313692092436,0.0025,0.0039631279
+Base survival probability H OD relative to Rx,Dmnl,"0.984 (0.966, 1.000)",Base survival probability H OD relative to Rx,0.98439340247,0.965803266,1
+Base survival probability Rx OD,Dmnl,"0.963 (0.952, 0.972)",Base survival probability Rx OD,0.96304899148,0.95179532,0.97232501
+Fentanyl effect on base survival max relative to H,Dmnl,"0.702 (0.610, 0.780)",Fentanyl effect on base survival max relative to H,0.702039249796,0.61023056,0.779958644
+Fentanyl effect on OD rate H max,Dmnl,"7.975 (5.090, 10.000)",Fentanyl effect on OD rate H max,7.97470433182,5.0896804,10
+Recurrence of use rate HUD,1/Year,"0.819 (0.424, 1.279)",Relapse rate HUD,0.819373181052,0.42395065,1.2792797
+Recurrence of use rate Rx OUD relative to HUD,Dmnl,"0.421 (0.220, 0.872)",Relapse rate Rx OUD relative to HUD,0.42103879112,0.21991624,0.87218153
+Remission rate Rx OUD relative to HUD,Dmnl,"2.420 (1.527, 3.000)",Remission rate Rx OUD relative to HUD,2.42048877232,1.5271281,3
+Tx seeking rate Rx OUD no H total,1/Year,"0.196 (0.145, 0.256)",Tx seeking rate Rx OUD no H total,0.196135148002,0.14542472,0.2560049975
+Tx seeking fraction Bup Rx OUD,Dmnl,"0.354 (0.253, 0.509)",Tx seeking fraction Bup Rx OUD,0.354478411412,0.25266271,0.50907844
+Tx seeking fraction Bup HUD,Dmnl,"0.820 (0.764, 0.872)",Tx seeking fraction Bup HUD,0.819653457878,0.76406865,0.8719057545
+Tx average duration Bup,Year,"0.496 (0.336, 0.672)",Tx average duration Bup,0.496414333448,0.33640128,0.67195605
+Tx average duration MMT,Year,"0.974 (0.735, 1.275)",Tx average duration MMT,0.973956238638,0.73492502,1.2753704
+Perceived risk strength initiating heroin with Rx use,Dmnl,"0.624 (0.528, 0.718)",Perceived risk strength initiating heroin with Rx use,0.624140354008,0.5275466835,0.71830196
+Perceived risk strength initiating NDHU no Rx,Dmnl,"0.013 (1.00×10⁻⁶, 0.045)",Perceived risk strength initiating NDHU no Rx,0.013472362824036,1e-06,0.04547465455
+Perceived risk strength initiating Rx use not as prescribed diverted,Dmnl,"1.971 (1.901, 2.000)",Perceived risk strength initiating Rx NP diverted,1.97093103128,1.9005183,2
+Perceived risk strength initiating Rx use not as prescribed own Rx,Dmnl,"1.912 (1.683, 2.000)",Perceived risk strength initiating Rx NP own Rx,1.911817482672,1.683296905,2
+Perceived risk strength net quit Rx use not as prescribed,Dmnl,"1.964 (1.880, 2.000)",Perceived risk strength net quit Rx NP,1.96409781274,1.8800373,2

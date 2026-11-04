@@ -1,0 +1,12 @@
+Time series,Data years,R2,Mean Error,Mean Absolute Error,SMAPE (%),Theil's U2
+"Rx opioid use not as prescribed, no past year heroin/illegal synthetics use",10,0.69,4287.46,64417.81,5.96,0.73
+"Rx OUD, no past year heroin/illegal synthetic use",10,0.54,-7875.81,40748.23,12.14,0.65
+Rx OUD with past year heroin/illegal synthetics use,10,0.13,-256.59,17998.01,31.28,0.54
+Past year heroin/illegal synthetics use without OUD,8,0.34,-19362.43,147695.46,113.38,0.75
+Heroin/illegal synthetics OUD,10,0.59,-5603.31,21576.35,52.92,0.59
+Buprenorphine receipt,15,0.99,482.06,1255.52,12.84,0.44
+Methadone receipt,8,0.31,-336,1504.43,2.87,0.77
+Rx overdose deaths,13,0.74,-4.18,32.25,3.25,0.6
+Heroin/illegal synthetics overdose deaths,13,0.86,132.43,648.17,24.75,0.94
+Total overdose deaths,17,0.88,22.46,574.76,14.04,0.87
+Average across series,,0.61,,,27.34,

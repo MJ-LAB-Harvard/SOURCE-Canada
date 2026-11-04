@@ -1,0 +1,16 @@
+scenario,year,variable,mean_pct_change,lower,upper
+Use,2036,Pol total PWURx NP and NDHU,-33.1,-36,-29.9
+Use,2036,Pol total UD,-5.4,-6.7,-4.5
+Use,2036,Pol total death,-7.4,-8.3,-6.6
+OUD,2036,Pol total PWURx NP and NDHU,15.8,12.7,19.2
+OUD,2036,Pol total UD,-15,-17.2,-12.9
+OUD,2036,Pol total death,-11.6,-13.3,-9.9
+ODD,2036,Pol total PWURx NP and NDHU,-0.3,-0.6,0
+ODD,2036,Pol total UD,2.4,2.2,2.6
+ODD,2036,Pol total death,-29.7,-30.3,-29.1
+Top3,2036,Pol total PWURx NP and NDHU,-16.3,-18.2,-14.3
+Top3,2036,Pol total UD,-7.3,-8.9,-5.9
+Top3,2036,Pol total death,-21,-21.9,-20
+All,2036,Pol total PWURx NP and NDHU,-22.2,-24.7,-19.7
+All,2036,Pol total UD,-19.7,-22.8,-16.8
+All,2036,Pol total death,-47.1,-48.8,-45.5

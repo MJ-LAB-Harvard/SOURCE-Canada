@@ -1,0 +1,37 @@
+scenario,year,variable,mean_pct_change,lower,upper
+DivRxInit,2036,Pol total PWURx NP and NDHU,-14,-16.2,-11.7
+DivRxInit,2036,Pol total UD,-1.1,-1.5,-0.7
+DivRxInit,2036,Pol total death,-1.3,-1.9,-0.8
+HInit,2036,Pol total PWURx NP and NDHU,-2.2,-3.3,-1.2
+HInit,2036,Pol total UD,-1.5,-2.1,-1
+HInit,2036,Pol total death,-4.5,-5.5,-3.6
+OwnRxInit,2036,Pol total PWURx NP and NDHU,-2,-2.4,-1.7
+OwnRxInit,2036,Pol total UD,-0.2,-0.2,-0.1
+OwnRxInit,2036,Pol total death,-0.2,-0.3,-0.1
+RxRate,2036,Pol total PWURx NP and NDHU,-20.2,-22.4,-17.7
+RxRate,2036,Pol total UD,-3.3,-4.5,-2.3
+RxRate,2036,Pol total death,-2.6,-3.4,-1.7
+DevOUD,2036,Pol total PWURx NP and NDHU,5.2,4.5,5.9
+DevOUD,2036,Pol total UD,-4.8,-5.4,-4.3
+DevOUD,2036,Pol total death,-5,-5.4,-4.6
+ReturntoOUD,2036,Pol total PWURx NP and NDHU,5.2,4,6.4
+ReturntoOUD,2036,Pol total UD,-5.2,-5.7,-4.7
+ReturntoOUD,2036,Pol total death,-3.4,-4,-2.8
+PeerRec,2036,Pol total PWURx NP and NDHU,4.7,3,6.9
+PeerRec,2036,Pol total UD,-5,-6.8,-3.4
+PeerRec,2036,Pol total death,-3.3,-4.8,-2
+FentODRisk,2036,Pol total PWURx NP and NDHU,-0.4,-0.6,-0.2
+FentODRisk,2036,Pol total UD,1.3,1.2,1.4
+FentODRisk,2036,Pol total death,-15.6,-16,-15.2
+NxKits,2036,Pol total PWURx NP and NDHU,-0.1,-0.2,-0.1
+NxKits,2036,Pol total UD,0.5,0.4,0.5
+NxKits,2036,Pol total death,-5.6,-5.8,-5.5
+ODwitnessed,2036,Pol total PWURx NP and NDHU,0.1,0,0.3
+ODwitnessed,2036,Pol total UD,0.8,0.8,0.9
+ODwitnessed,2036,Pol total death,-10.2,-10.5,-10
+TxSeeking,2036,Pol total PWURx NP and NDHU,1.7,1.3,2
+TxSeeking,2036,Pol total UD,-0.8,-1.1,-0.5
+TxSeeking,2036,Pol total death,-3.4,-3.8,-3.1
+TxDuration,2036,Pol total PWURx NP and NDHU,1.2,0.9,1.5
+TxDuration,2036,Pol total UD,-0.7,-1.3,-0.1
+TxDuration,2036,Pol total death,-2.8,-3.2,-2.4
