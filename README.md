@@ -25,9 +25,8 @@ This repository is intended to contain the **model files, result files, and anal
 
 **Modeling the Opioid Crisis in Canada: Future Projections and the Impact of Intervention Strategies**
 
-Hasgul, Z., Mahmoudi, H., Plouffe, R., Sadeghieh, T., Johnson, K., Graham, E., & Jalali, M. S.
+Hasgul, Z., Mahmoudi, H., Plouffe, R., Sadeghieh, T., Johnson, K., Graham, E., & Jalali, M.S.
 
-*Manuscript is under review. Publication link to be added when available.*
 
 The study uses SOURCE-Canada to project opioid-related outcomes through 2036 using historical Canadian data from **2009 to 2025**, the model generates projections through **2036** under three scenarios:
 
