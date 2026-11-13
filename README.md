@@ -66,7 +66,7 @@ The availability of model input datasets, processed data, and replication files 
 ---
 
 
-## Funding and Acknowledgements
+## Acknowledgements
 
 This work was funded by the **Public Health Agency of Canada (PHAC)**, which provided data, subject matter expertise, and input into study design and interpretation.
 
